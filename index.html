@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Access</title>
+</head>
+<body>
+    <div id="quiz"></div>
+    <script>
+        async function fetchQuiz() {
+            let url = 'quiz.json';
+            try {
+                let res = await fetch(url);
+                return await res.json();
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        async function renderQuiz() {
+
+            let quiz = await fetchQuiz();
+
+            let html = '';
+
+            for (let question in quiz["quiz"]) {
+
+                let questionTitle = "Question " + question.replace("q", "");
+
+                let questionHtml = `<h1>${questionTitle}: ${quiz["quiz"][question]["question"]}</h1>`;
+
+                html += questionHtml;
+
+                let options = quiz["quiz"][question]["options"];
+
+                options.forEach(function (item, index) {
+
+                    let id = question + "-" + index;
+
+                    let isChecked = localStorage.getItem(question) === id ? "checked" : "";
+
+                    let optionHtml = `
+                        <input type="radio" id="${id}" name="${question}" value="${item}" onclick="handleQuestionAnswerClick(this);" ${isChecked}>
+                        <label for="${id}">${item}</label>
+                        <br>
+                    `;
+
+                    html += optionHtml;
+                });
+            }
+
+            let quizContainer = document.getElementById('quiz');
+            quizContainer.innerHTML = html;
+        }
+
+        function handleQuestionAnswerClick(radio) {
+            localStorage.setItem(radio.name, radio.id);
+        }
+
+        renderQuiz();
+    </script>
+</body>
+</html>
